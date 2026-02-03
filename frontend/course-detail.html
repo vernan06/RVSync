@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Detail - RVSync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .flashcard-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .flashcard {
+            width: 400px; height: 250px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            position: relative; width: 100%; height: 100%;
+            text-align: center; transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 2rem; border-radius: 1rem;
+            background: var(--surface-color); border: 1px solid var(--primary-color);
+        }
+        .flashcard-back { transform: rotateY(180deg); background: var(--bg-color); }
+        
+        .syllabus-unit {
+             border: 1px solid var(--white-05);
+             border-radius: 0.5rem;
+             overflow: hidden;
+             margin-bottom: 0.5rem;
+        }
+        .unit-header {
+            padding: 1rem; background: var(--white-05);
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer;
+        }
+        .unit-content { padding: 1rem; display: none; background: rgba(255,255,255,0.02); }
+        .unit-content.active { display: block; }
+
+        .test-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+            display: none; flex-direction: column;
+            padding: 2rem; z-index: 1001;
+            overflow-y: auto;
+        }
+        
+        .course-hero {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+            border-bottom: 1px solid var(--white-05);
+            margin: -2rem -2rem 2rem -2rem;
+            padding: 3rem 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">📚</div>
+                <span class="sidebar-logo-text">RVSync</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span> Dashboard</a>
+                    <a href="hub.html" class="nav-item"><span class="nav-item-icon">🏠</span> Classroom Hub</a>
+                    <a href="chat.html" class="nav-item"><span class="nav-item-icon">💬</span> Messages</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Learning</div>
+                    <a href="courses.html" class="nav-item active"><span class="nav-item-icon">📖</span> Courses</a>
+                    <a href="assignments.html" class="nav-item"><span class="nav-item-icon">📝</span> Assignments</a>
+                    <a href="tests.html" class="nav-item"><span class="nav-item-icon">✅</span> Tests</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Career</div>
+                    <a href="opportunities.html" class="nav-item"><span class="nav-item-icon">💼</span> Opportunities</a>
+                    <a href="profile.html" class="nav-item"><span class="nav-item-icon">👤</span> Profile</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="auth.logout()">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">User</div>
+                        <div class="user-role">Sign Out</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="container pb-10">
+                <!-- Navigation Breadcrumb -->
+                <div class="flex items-center gap-2 mb-6 text-xs text-secondary">
+                    <a href="courses.html" class="hover:text-primary transition-colors">Courses</a>
+                    <span>/</span>
+                    <span id="breadcrumbCourse" class="text-white">Loading...</span>
+                </div>
+
+                <div id="courseHero" class="course-hero">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="badge badge-primary px-3 py-1" id="courseCode">CODE</span>
+                                <span class="badge badge-secondary" id="courseCredits">0 Credits</span>
+                            </div>
+                            <h1 id="courseTitle" class="text-3xl md:text-4xl font-bold mb-2">Course Name</h1>
+                            <p id="courseInstructorDisplay" class="text-secondary">Instructor: -</p>
+                        </div>
+                        <div class="flex gap-3">
+                             <div class="card bg-white/5 border-white/10 flex items-center gap-3 py-2 px-4">
+                                <div class="avatar-sm" id="instructorInitial">?</div>
+                                <div>
+                                    <div class="text-[10px] text-secondary uppercase font-bold">Faculty In-Charge</div>
+                                    <div class="text-xs font-bold" id="courseInstructor">Instructor Name</div>
+                                    <div class="text-[9px] text-primary" id="instructorEmail">email@rvce.edu.in</div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Column: Syllabus & Content -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Course Stream (Updates) -->
+                        <div class="card bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+                            <div class="card-header pb-2 border-b border-white/5 mb-4 flex justify-between items-center">
+                                <h3 class="card-title flex items-center gap-2">
+                                    <span>📢</span> Course Stream
+                                </h3>
+                                <div id="updateCount" class="text-[10px] text-secondary font-mono uppercase">0 updates</div>
+                            </div>
+                            
+                            <!-- Post Update Form (Instructor Only) -->
+                            <div id="postUpdateSection" class="hidden mb-6">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <textarea id="updateContent" class="w-full bg-transparent border-none focus:ring-0 text-sm placeholder:text-secondary/50" placeholder="Share something with your course..." rows="2" style="outline: none;"></textarea>
+                                    <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+                                        <div class="flex gap-2">
+                                            <select id="updateType" class="bg-white/10 border-none text-[10px] rounded px-2 py-1 outline-none text-white cursor-pointer">
+                                                <option value="update" class="bg-bg-primary">Update</option>
+                                                <option value="announcement" class="bg-bg-primary">Announcement</option>
+                                                <option value="alert" class="bg-bg-primary">Alert</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-primary btn-xs px-4" onclick="postUpdate()">Post Update</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="updatesList" class="space-y-4">
+                                <!-- Updates will load here -->
+                                <p class="text-center text-secondary text-sm py-8">Loading updates...</p>
+                            </div>
+                        </div>
+
+                        <div id="syllabusSection" class="card hidden">
+                            <div class="card-header pb-2 border-b border-white/5 mb-4">
+                                <h3 class="card-title">📐 Academic Syllabus</h3>
+                            </div>
+                            <div id="syllabusUnits" class="space-y-2">
+                                <!-- Dynamic Units -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header pb-2 border-b border-white/5 mb-4">
+                                <h3 class="card-title">📁 Learning Materials</h3>
+                            </div>
+                            <div id="materialsList" class="space-y-2">
+                                <p class="text-secondary text-sm">No materials available</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header pb-2 border-b border-white/5 mb-4">
+                                <h3 class="card-title">📝 Assignments</h3>
+                            </div>
+                            <div id="assignmentsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <p class="text-secondary text-sm p-4 text-center col-span-full">No assignments posted yet</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Study Hub & Widgets -->
+                    <div class="space-y-6">
+                        <div id="studyHub" class="card border-primary/30 hidden">
+                             <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <span class="p-1.5 bg-primary/20 rounded">🧠</span> Math Practice Hub
+                             </h3>
+                             <div class="space-y-3">
+                                <div class="card bg-white/5 hover:bg-white/10 border-white/10 cursor-pointer transition-all p-4" onclick="openFlashcards()">
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-2xl">🗂️</div>
+                                        <div>
+                                            <h4 class="font-bold text-sm">Flashcards</h4>
+                                            <p class="text-[9px] text-secondary">Quick formula revision</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card bg-white/5 hover:bg-white/10 border-white/10 cursor-pointer transition-all p-4" onclick="openTestsList()">
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-2xl">✍️</div>
+                                        <div>
+                                            <h4 class="font-bold text-sm">Assessments</h4>
+                                            <p class="text-[9px] text-secondary">Mock practice tests</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-primary/5 rounded-lg border border-primary/10">
+                                    <p class="text-[10px] text-secondary">Recommended for you based on current unit progress.</p>
+                                </div>
+                             </div>
+                        </div>
+
+                        <div class="card bg-surface/50">
+                            <h4 class="text-secondary text-xs uppercase mb-3 font-bold">Quick Links</h4>
+                            <div class="space-y-1">
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-white/5 text-xs"><span>🔗</span> Course Webpage</a>
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-white/5 text-xs"><span>📅</span> Attendance Tracker</a>
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-white/5 text-xs"><span>💬</span> Course Study Group</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Flashcard Modal -->
+    <div id="flashcardModal" class="flashcard-modal">
+        <div class="flex flex-col items-center gap-6 w-full max-w-xl">
+            <div class="flashcard" id="currentFlashcard" onclick="flipCard()">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <div class="text-secondary text-xs uppercase mb-4" id="fcCategory">Category</div>
+                        <h2 class="text-2xl font-bold text-center" id="fcFront">Front</h2>
+                        <div class="text-xs text-secondary mt-10">Click to flip</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <h4 class="text-primary text-xs uppercase mb-4">Definition / Formula</h4>
+                        <div class="text-lg text-center" id="fcBack">Back</div>
+                        <div class="text-xs text-secondary mt-10">Click to return</div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button class="btn btn-ghost" onclick="prevCard()">← Prev</button>
+                <div class="text-secondary self-center" id="fcCounter">1 / 5</div>
+                <button class="btn btn-ghost" onclick="nextCard()">Next →</button>
+            </div>
+            <button class="btn btn-outline btn-sm mt-4" onclick="closeFlashcards()">Close Study Mode</button>
+        </div>
+    </div>
+
+    <!-- Test List Modal -->
+    <div id="testListModal" class="flashcard-modal">
+         <div class="card w-full max-w-lg bg-surface border-white/10">
+             <div class="flex justify-between items-center mb-6">
+                 <h2 class="text-xl font-bold">Select Practice Test</h2>
+                 <button class="btn btn-ghost btn-sm" onclick="closeTestsList()">✕</button>
+             </div>
+             <div id="testsListContainer" class="space-y-3">
+                 <!-- Tests here -->
+             </div>
+         </div>
+    </div>
+
+    <!-- Test Taking Modal -->
+    <div id="testTakingModal" class="test-modal">
+        <div class="max-w-3xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary" id="activeTestTitle">Test</h2>
+                    <p class="text-secondary text-sm" id="activeTestDesc">Description</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-mono text-warning" id="testTimer">15:00</div>
+                    <div class="text-[10px] uppercase text-secondary">Time Remaining</div>
+                </div>
+            </div>
+
+            <div id="questionsContainer" class="space-y-8">
+                <!-- Questions -->
+            </div>
+
+            <div class="mt-12 flex justify-end gap-4 pb-10">
+                <button class="btn btn-ghost" onclick="quitTest()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitActiveTest()">Finalize & Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ai-support.js"></script>
+    <script>
+        if (!auth.requireAuth()) throw new Error('Not authenticated');
+        
+        const user = auth.getUser();
+        document.getElementById('userName').textContent = user?.name || 'User';
+        document.getElementById('userAvatar').textContent = auth.getUserInitials();
+
+        let currentCourse = null;
+        let testQuestions = [];
+        let activeTestId = null;
+
+        // Get Course ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('id');
+
+        if (!courseId) {
+            window.location.href = 'courses.html';
+        }
+
+        async function loadCourseDetail() {
+            try {
+                const detail = await api.getCourseDetail(courseId);
+                currentCourse = detail;
+                
+                document.getElementById('breadcrumbCourse').textContent = detail.name;
+                document.getElementById('courseTitle').textContent = detail.name;
+                document.getElementById('courseCode').textContent = detail.code;
+                document.getElementById('courseCredits').textContent = `${detail.credits} Credits`;
+                document.getElementById('courseInstructor').textContent = detail.instructor;
+                document.getElementById('courseInstructorDisplay').textContent = `Faculty In-Charge: ${detail.instructor || 'TBA'}`;
+                
+                // Instructor UI
+                const instName = detail.instructor || 'TBA';
+                document.getElementById('instructorInitial').textContent = instName[0];
+                const emailPrefix = instName.toLowerCase().replace(/\s/g, '').replace('dr.', '').replace('prof.', '');
+                document.getElementById('instructorEmail').textContent = `${emailPrefix}@rvce.edu.in`;
+
+                // Syllabus Explorer
+                const syllabusSection = document.getElementById('syllabusSection');
+                const syllabusUnits = document.getElementById('syllabusUnits');
+                const studyHub = document.getElementById('studyHub');
+                
+                try {
+                    const syllabusData = JSON.parse(detail.description);
+                    if (Array.isArray(syllabusData)) {
+                        syllabusSection.classList.remove('hidden');
+                        studyHub.classList.remove('hidden');
+                        syllabusUnits.innerHTML = syllabusData.map((u, i) => `
+                            <div class="syllabus-unit">
+                                <div class="unit-header" onclick="toggleUnit(${i})">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-primary font-bold">Unit ${i+1}:</span>
+                                        <span class="font-medium text-sm">${u.title}</span>
+                                    </div>
+                                    <span class="unit-toggle-icon">▼</span>
+                                </div>
+                                <div class="unit-content" id="unit-${i}">
+                                    <ul class="text-xs space-y-1 text-secondary">
+                                        ${u.topics.map(t => `<li>• ${t}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                } catch (e) {
+                    console.error("No JSON syllabus found");
+                }
+
+                // Materials
+                const materialsContainer = document.getElementById('materialsList');
+                if (detail.materials && detail.materials.length > 0) {
+                    materialsContainer.innerHTML = detail.materials.map(m => `
+                        <div class="flex justify-between items-center p-3 rounded hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-white/5 rounded flex items-center justify-center text-xl">
+                                    ${m.type === 'video' ? '🎥' : m.type === 'link' ? '🔗' : '📄'}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-white">${m.title}</div>
+                                    <div class="text-[10px] text-secondary">Uploaded ${new Date(m.uploaded_at || Date.now()).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-xs btn-outline hover:btn-primary" onclick="alert('Download started')">Download</button>
+                        </div>
+                    `).join('');
+                } else {
+                    materialsContainer.innerHTML = '<p class="text-secondary text-sm p-4 text-center">No materials available yet.</p>';
+                }
+
+                // Updates Stream
+                const updatesList = document.getElementById('updatesList');
+                const updateCount = document.getElementById('updateCount');
+                
+                if (detail.updates && detail.updates.length > 0) {
+                    updateCount.textContent = `${detail.updates.length} updates`;
+                    renderUpdates(detail.updates);
+                } else {
+                    updateCount.textContent = '0 updates';
+                    updatesList.innerHTML = '<p class="text-center text-secondary text-sm py-8">No updates posted yet.</p>';
+                }
+
+                // Show Post Update Section for Instructors
+                if (detail.instructor === user.name) {
+                    document.getElementById('postUpdateSection').classList.remove('hidden');
+                }
+
+            } catch (e) {
+                console.error("Error fetching details:", e);
+                alert("Could not load course details");
+            }
+        }
+
+        async function postUpdate() {
+            const content = document.getElementById('updateContent').value;
+            const type = document.getElementById('updateType').value;
+            
+            if (!content.trim()) return;
+            
+            try {
+                const response = await api.postCourseUpdate(courseId, {
+                    content: content,
+                    type: type
+                });
+                
+                document.getElementById('updateContent').value = '';
+                // Reload locally
+                loadCourseDetail(); 
+            } catch (e) {
+                alert("Failed to post update: " + e.message);
+            }
+        }
+
+        function renderUpdates(updates) {
+            const container = document.getElementById('updatesList');
+            container.innerHTML = updates.map(u => `
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full ${u.type === 'alert' ? 'bg-error-500' : u.type === 'announcement' ? 'bg-warning-500' : 'bg-primary'} animate-pulse"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest ${u.type === 'alert' ? 'text-error' : u.type === 'announcement' ? 'text-warning' : 'text-primary'}">${u.type}</span>
+                            <span class="text-white/20 text-xs">•</span>
+                            <span class="text-[10px] text-secondary font-medium">${new Date(u.created_at).toLocaleDateString()} at ${new Date(u.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <div class="text-[10px] text-secondary font-bold">BY ${u.author_name?.toUpperCase() || 'FACULTY'}</div>
+                    </div>
+                    <div class="text-xs leading-relaxed text-secondary select-text">${u.content}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleUnit(idx) {
+             const content = document.getElementById(`unit-${idx}`);
+             const allContents = document.querySelectorAll('.unit-content');
+             allContents.forEach(c => {
+                if (c.id !== `unit-${idx}`) c.classList.remove('active');
+             });
+             content.classList.toggle('active');
+        }
+
+        // FLASHCARDS (Same logic as before but better integrated)
+        let flashcards = [
+            { cat: 'Linear Algebra', q: 'Rank-Nullity Theorem', a: 'rank(A) + nullity(A) = n (number of columns)' },
+            { cat: 'Linear Algebra', q: 'Gram-Schmidt Process', a: 'A method for orthonormalizing a set of vectors in an inner product space.' },
+            { cat: 'Discrete Math', q: 'Handshaking Lemma', a: 'The sum of all vertex degrees in a graph is twice the number of edges.' },
+            { cat: 'Probability', q: 'Bayes Theorem', a: 'P(A|B) = [P(B|A) * P(A)] / P(B)' },
+            { cat: 'Linear Algebra', q: 'Singular Value Decomposition (SVD)', a: 'Factorization of a real or complex matrix A = UΣVᵀ' }
+        ];
+        let fcIdx = 0;
+
+        function openFlashcards() {
+            document.getElementById('flashcardModal').style.display = 'flex';
+            renderCard();
+        }
+        function closeFlashcards() { document.getElementById('flashcardModal').style.display = 'none'; }
+        function flipCard() { document.getElementById('currentFlashcard').classList.toggle('flipped'); }
+        function renderCard() {
+            const fc = flashcards[fcIdx];
+            document.getElementById('currentFlashcard').classList.remove('flipped');
+            document.getElementById('fcCategory').textContent = fc.cat;
+            document.getElementById('fcFront').textContent = fc.q;
+            document.getElementById('fcBack').textContent = fc.a;
+            document.getElementById('fcCounter').textContent = `${fcIdx + 1} / ${flashcards.length}`;
+        }
+        function nextCard() { fcIdx = (fcIdx + 1) % flashcards.length; renderCard(); }
+        function prevCard() { fcIdx = (fcIdx - 1 + flashcards.length) % flashcards.length; renderCard(); }
+
+        // TESTS
+        async function openTestsList() {
+            const container = document.getElementById('testsListContainer');
+            container.innerHTML = '<p class="text-center text-secondary">Loading tests...</p>';
+            document.getElementById('testListModal').style.display = 'flex';
+
+            try {
+                if (currentCourse.tests && currentCourse.tests.length > 0) {
+                    container.innerHTML = currentCourse.tests.map(t => `
+                        <div class="card bg-surface hover:bg-white/5 border-white/10 flex justify-between items-center p-4">
+                            <div>
+                                <h5 class="font-bold text-sm">${t.title}</h5>
+                                <p class="text-[10px] text-secondary">${t.total_points} Points • ${t.time_limit} Mins</p>
+                            </div>
+                            <button class="btn btn-xs btn-primary px-4" onclick="startTest(${t.id})">Take Test</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-center text-sm text-secondary">No tests available for this course.</p>';
+                }
+            } catch (e) {
+                container.innerHTML = '<p class="text-center text-error">Failed to load tests</p>';
+            }
+        }
+        function closeTestsList() { document.getElementById('testListModal').style.display = 'none'; }
+
+        async function startTest(testId) {
+            closeTestsList();
+            try {
+                const test = await api.getTestDetails(testId);
+                activeTestId = testId;
+                testQuestions = test.questions;
+                
+                document.getElementById('activeTestTitle').textContent = test.title;
+                document.getElementById('activeTestDesc').textContent = test.description;
+                
+                const qCont = document.getElementById('questionsContainer');
+                qCont.innerHTML = test.questions.map((q, i) => `
+                    <div class="question-block card border-white/10 bg-surface/30 p-8">
+                        <div class="flex gap-5 mb-6">
+                            <span class="bg-primary/20 text-primary w-10 h-10 flex items-center justify-center rounded-xl font-bold border border-primary/20">${i+1}</span>
+                            <div class="text-xl font-medium text-white mt-1">${q.question}</div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-14">
+                            ${q.options.map(opt => `
+                                <label class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:border-primary/50 cursor-pointer transition-all bg-black/20 hover:bg-black/40">
+                                    <input type="radio" name="q${i}" value="${opt}" class="radio radio-primary">
+                                    <span class="text-sm font-medium">${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('testTakingModal').style.display = 'flex';
+                let timeLeft = test.time_limit * 60;
+                const timerEl = document.getElementById('testTimer');
+                const timerInt = setInterval(() => {
+                    if (timeLeft <= 0 || document.getElementById('testTakingModal').style.display === 'none') {
+                        clearInterval(timerInt);
+                        return;
+                    }
+                    timeLeft--;
+                    const m = Math.floor(timeLeft / 60);
+                    const s = timeLeft % 60;
+                    timerEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+                }, 1000);
+
+            } catch (e) {
+                alert("Could not load test details");
+            }
+        }
+
+        async function submitActiveTest() {
+            const answers = {};
+            testQuestions.forEach((_, i) => {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selected) answers[i] = selected.value;
+            });
+
+            try {
+                const result = await api.submitTest(activeTestId, answers);
+                alert(`Test Submitted! Your Score: ${result.score} (${result.percentage}%) \n${result.passed ? 'PASSED ✅' : 'FAILED ❌'}`);
+                quitTest();
+            } catch (e) {
+                alert("Submission failed: " + e.message);
+            }
+        }
+
+        function quitTest() {
+            document.getElementById('testTakingModal').style.display = 'none';
+        }
+
+        loadCourseDetail();
+    </script>
+</body>
+</html>

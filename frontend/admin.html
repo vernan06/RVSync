@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - RVSync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🔐</div>
+                <span class="sidebar-logo-text">Admin Panel</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Overview</div>
+                    <a href="#" class="nav-item active" onclick="showSection('overview')">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">Management</div>
+                    <a href="#" class="nav-item" onclick="showSection('users')">
+                        <span class="nav-item-icon">👥</span>
+                        All Users
+                    </a>
+                    <a href="#" class="nav-item" onclick="showSection('classrooms')">
+                        <span class="nav-item-icon">🏫</span>
+                        All Classrooms
+                    </a>
+                    <a href="#" class="nav-item" onclick="showSection('enrollments')">
+                        <span class="nav-item-icon">📋</span>
+                        Enrollments
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="auth.logout()">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div class="user-info">
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">Sign Out</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Overview Section -->
+                <div id="section-overview">
+                    <h1 class="mb-4">🔐 Admin Dashboard</h1>
+                    
+                    <div class="stats-grid mb-4">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🏫</div>
+                            <div class="stat-value" id="totalClassrooms">0</div>
+                            <div class="stat-label">Classrooms</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-value" id="totalEnrollments">0</div>
+                            <div class="stat-label">Enrollments</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Users Section -->
+                <div id="section-users" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1>👥 All Users</h1>
+                    </div>
+                    <div class="card">
+                        <table class="w-full" style="border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <th style="text-align: left; padding: 0.75rem;">ID</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Name</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Email</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Branch</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Year</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Section</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Admin</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Classrooms Section -->
+                <div id="section-classrooms" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1>🏫 All Classrooms</h1>
+                    </div>
+                    <div class="card">
+                        <table class="w-full" style="border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <th style="text-align: left; padding: 0.75rem;">ID</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Name</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Code</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Branch</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Year</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Section</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Students</th>
+                                </tr>
+                            </thead>
+                            <tbody id="classroomsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Enrollments Section -->
+                <div id="section-enrollments" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1>📋 All Enrollments</h1>
+                    </div>
+                    <div class="card">
+                        <table class="w-full" style="border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <th style="text-align: left; padding: 0.75rem;">ID</th>
+                                    <th style="text-align: left; padding: 0.75rem;">User</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Classroom</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Role</th>
+                                    <th style="text-align: left; padding: 0.75rem;">Enrolled At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="enrollmentsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        if (!auth.requireAuth()) throw new Error('Not authenticated');
+        
+        // Check admin access
+        (async () => {
+            try {
+                const profile = await api.getProfile();
+                if (!profile.is_admin) {
+                    alert('Access Denied: Admin privileges required.');
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+                loadAdminData();
+            } catch (e) {
+                alert('Failed to verify admin access');
+                window.location.href = 'dashboard.html';
+            }
+        })();
+        
+        function showSection(name) {
+            document.querySelectorAll('[id^="section-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById('section-' + name).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+        }
+        
+        async function loadAdminData() {
+            try {
+                const data = await api.request('/api/admin/stats');
+                
+                document.getElementById('totalUsers').textContent = data.total_users;
+                document.getElementById('totalClassrooms').textContent = data.total_classrooms;
+                document.getElementById('totalEnrollments').textContent = data.total_enrollments;
+                
+                // Users table
+                document.getElementById('usersTable').innerHTML = data.users.map(u => `
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem;">${u.id}</td>
+                        <td style="padding: 0.75rem;">${u.name}</td>
+                        <td style="padding: 0.75rem;">${u.email}</td>
+                        <td style="padding: 0.75rem;">${u.branch || '-'}</td>
+                        <td style="padding: 0.75rem;">${u.year_level || '-'}</td>
+                        <td style="padding: 0.75rem;">${u.section || '-'}</td>
+                        <td style="padding: 0.75rem;">${u.is_admin ? '✅' : '-'}</td>
+                    </tr>
+                `).join('');
+                
+                // Classrooms table
+                document.getElementById('classroomsTable').innerHTML = data.classrooms.map(c => `
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem;">${c.id}</td>
+                        <td style="padding: 0.75rem;">${c.name}</td>
+                        <td style="padding: 0.75rem;">${c.code}</td>
+                        <td style="padding: 0.75rem;">${c.branch}</td>
+                        <td style="padding: 0.75rem;">${c.year_level}</td>
+                        <td style="padding: 0.75rem;">${c.section}</td>
+                        <td style="padding: 0.75rem;">${c.student_count}</td>
+                    </tr>
+                `).join('');
+                
+                // Enrollments table
+                document.getElementById('enrollmentsTable').innerHTML = data.enrollments.map(e => `
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem;">${e.id}</td>
+                        <td style="padding: 0.75rem;">${e.user_name}</td>
+                        <td style="padding: 0.75rem;">${e.classroom_name}</td>
+                        <td style="padding: 0.75rem;">${e.role}</td>
+                        <td style="padding: 0.75rem;">${new Date(e.enrolled_at).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Failed to load admin data:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tests - RVSync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><div class="sidebar-logo-icon">📚</div><span class="sidebar-logo-text">RVSync</span></div>
+            <nav class="sidebar-nav">
+                <div class="nav-group"><div class="nav-group-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span> Dashboard</a>
+                    <a href="hub.html" class="nav-item"><span class="nav-item-icon">🏠</span> Hub</a>
+                    <a href="chat.html" class="nav-item"><span class="nav-item-icon">💬</span> Messages</a>
+                </div>
+                <div class="nav-group"><div class="nav-group-title">Learning</div>
+                    <a href="courses.html" class="nav-item"><span class="nav-item-icon">📖</span> Courses</a>
+                    <a href="assignments.html" class="nav-item"><span class="nav-item-icon">📝</span> Assignments</a>
+                    <a href="tests.html" class="nav-item active"><span class="nav-item-icon">✅</span> Tests</a>
+                </div>
+                <div class="nav-group"><div class="nav-group-title">Career</div>
+                    <a href="opportunities.html" class="nav-item"><span class="nav-item-icon">💼</span> Opportunities</a>
+                    <a href="profile.html" class="nav-item"><span class="nav-item-icon">👤</span> Profile</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="auth.logout()">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info"><div class="user-name" id="userName">User</div><div class="user-role">Sign Out</div></div>
+                </div>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="container">
+                <h1 class="mb-4">✅ Tests</h1>
+                <div class="stats-grid mb-4">
+                    <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value">3</div><div class="stat-label">Available</div></div>
+                    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">1</div><div class="stat-label">Completed</div></div>
+                    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value">78%</div><div class="stat-label">Avg Score</div></div>
+                </div>
+                <div class="grid-2">
+                    <div><h3 class="mb-4">📝 Available</h3>
+                        <div class="card mb-4"><h4>DSA Quiz</h4><p class="text-sm text-secondary">Data Structures • 60 min • 100 pts</p>
+                            <button class="btn btn-primary mt-2" onclick="alert('Test would start')">Start</button></div>
+                        <div class="card mb-4"><h4>JS Fundamentals</h4><p class="text-sm text-secondary">Web Dev • 30 min • 50 pts</p>
+                            <button class="btn btn-primary mt-2" onclick="alert('Test would start')">Start</button></div>
+                    </div>
+                    <div><h3 class="mb-4">📊 Results</h3>
+                        <div class="card" style="border-left:4px solid var(--success-500)">
+                            <div class="flex justify-between"><div><h4>Python Quiz</h4><p class="text-sm text-secondary">Completed Jan 15</p></div>
+                            <div class="text-right"><div class="stat-value text-gradient">78%</div><span class="badge badge-success">Passed</span></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/api.js"></script><script src="js/auth.js"></script>
+    <script>if(!auth.requireAuth())throw'';document.getElementById('userName').textContent=auth.getUser()?.name||'User';document.getElementById('userAvatar').textContent=auth.getUserInitials();</script>
+</body>
+</html>

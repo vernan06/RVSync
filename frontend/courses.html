@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses - RVSync</title>
+    <meta name="description" content="Browse and manage your courses">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">📚</div>
+                <span class="sidebar-logo-text">RVSync</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span> Dashboard</a>
+                    <a href="hub.html" class="nav-item"><span class="nav-item-icon">🏠</span> Classroom Hub</a>
+                    <a href="chat.html" class="nav-item"><span class="nav-item-icon">💬</span> Messages</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Learning</div>
+                    <a href="courses.html" class="nav-item active"><span class="nav-item-icon">📖</span> Courses</a>
+                    <a href="assignments.html" class="nav-item"><span class="nav-item-icon">📝</span> Assignments</a>
+                    <a href="tests.html" class="nav-item"><span class="nav-item-icon">✅</span> Tests</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Career</div>
+                    <a href="opportunities.html" class="nav-item"><span class="nav-item-icon">💼</span> Opportunities</a>
+                    <a href="profile.html" class="nav-item"><span class="nav-item-icon">👤</span> Profile</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="auth.logout()">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role">Sign Out</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="container pb-10">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold animate-fade-in">📖 My Courses</h1>
+                    <div class="text-xs text-secondary">View your enrolled subjects and academic resources</div>
+                </div>
+                
+                <div id="coursesList" class="flex flex-col gap-3">
+                    <div class="card">
+                        <p class="text-center text-secondary">Loading your academic subjects...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ai-support.js"></script>
+    <script>
+        if (!auth.requireAuth()) throw new Error('Not authenticated');
+        
+        const user = auth.getUser();
+        document.getElementById('userName').textContent = user?.name || 'User';
+        document.getElementById('userAvatar').textContent = auth.getUserInitials();
+        
+        async function loadCourses() {
+            const container = document.getElementById('coursesList');
+            
+            try {
+                const courses = await api.getMyCourses();
+                
+                if (courses.length === 0) {
+                    container.innerHTML = `
+                        <div class="card text-center p-12">
+                            <div class="text-5xl mb-4">🧊</div>
+                            <h3 class="text-xl font-bold mb-2">No Courses Enrolled</h3>
+                            <p class="text-secondary mb-6">Join a classroom to see your courses and materials.</p>
+                            <a href="hub.html" class="btn btn-primary">Go to Classroom Hub</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = courses.map(c => `
+                    <div class="card hover:border-primary cursor-pointer transition-all group flex items-center justify-between p-4" onclick="location.href='course-detail.html?id=${c.id}'">
+                        <div class="flex items-center gap-6">
+                            <span class="badge badge-primary px-3 py-1 font-mono text-xs w-24 flex justify-center">${c.code}</span>
+                            <div>
+                                <h4 class="text-base font-bold group-hover:text-primary transition-colors">${c.name}</h4>
+                                <div class="flex items-center gap-4 mt-1">
+                                    <span class="text-[10px] text-secondary font-medium uppercase tracking-wider">${c.credits} Credits</span>
+                                    <span class="text-[10px] text-white/20">•</span>
+                                    <span class="text-[10px] text-secondary font-medium">👨‍🏫 ${c.instructor || 'TBD'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-primary text-xs font-bold opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">View Full Page →</span>
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-secondary group-hover:bg-primary/20 group-hover:text-primary transition-colors">
+                                <span class="text-xs">▶</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                container.innerHTML = `
+                    <div class="col-span-full card text-center p-12 border-error/50">
+                        <p class="text-error font-bold mb-2">Sync Error</p>
+                        <p class="text-secondary mb-4">We couldn't load your courses. Please check your connection.</p>
+                        <button class="btn btn-ghost btn-sm" onclick="location.reload()">Retry Sync</button>
+                    </div>
+                `;
+            }
+        }
+        
+        loadCourses();
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RVSync - Create Account</title>
+    <meta name="description" content="Join RVSync - Your Learning & Career Development Platform">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-container animate-fade-in">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-logo">🚀</div>
+                    <h1 class="auth-title">Create Account</h1>
+                    <p class="auth-subtitle">Join RVSync to accelerate your career</p>
+                </div>
+                
+                <form class="auth-form" id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name</label>
+                        <input type="text" class="form-input" id="name" 
+                               placeholder="John Doe" required autocomplete="name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" class="form-input" id="email" 
+                               placeholder="you@rvce.edu.in" required autocomplete="email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="studentId">Student ID (Optional)</label>
+                        <input type="text" class="form-input" id="studentId" 
+                               placeholder="1RV21CS001">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" class="form-input" id="password" 
+                               placeholder="Create a strong password" required minlength="6" autocomplete="new-password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">Confirm Password</label>
+                        <input type="password" class="form-input" id="confirmPassword" 
+                               placeholder="Confirm your password" required autocomplete="new-password">
+                    </div>
+                    
+                    <div id="errorMessage" class="hidden" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error-500); border-radius: var(--border-radius-md); padding: 0.75rem; margin-bottom: 1rem; color: var(--error-500); font-size: var(--font-size-sm);"></div>
+                    
+                    <div id="successMessage" class="hidden" style="background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success-500); border-radius: var(--border-radius-md); padding: 0.75rem; margin-bottom: 1rem; color: var(--success-500); font-size: var(--font-size-sm);"></div>
+                    
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span id="btnText">Create Account</span>
+                        <span id="btnLoader" class="hidden">Creating...</span>
+                    </button>
+                </form>
+                
+                <div class="auth-footer">
+                    Already have an account? <a href="login.html">Sign in</a>
+                </div>
+            </div>
+            
+            <p class="text-center text-secondary text-sm mt-4">
+                By creating an account, you agree to our Terms & Privacy Policy
+            </p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const studentId = document.getElementById('studentId').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            // Show loading
+            btnText.classList.add('hidden');
+            btnLoader.classList.remove('hidden');
+            submitBtn.disabled = true;
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+            
+            try {
+                const response = await api.register({ name, email, password, student_id: studentId || null });
+                
+                if (response.access_token) {
+                    auth.setToken(response.access_token);
+                    auth.setUser({
+                        id: response.user_id,
+                        name: response.name
+                    });
+                    
+                    successDiv.textContent = 'Account created! Redirecting...';
+                    successDiv.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error(error);
+                if (error.message === 'Failed to fetch') {
+                    errorDiv.textContent = 'Cannot connect to server. Please ensure the backend is running.';
+                } else {
+                    errorDiv.textContent = error.message || 'Registration failed. Please try again.';
+                }
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btnText.classList.remove('hidden');
+                btnLoader.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Redirect if already logged in
+        if (auth.isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

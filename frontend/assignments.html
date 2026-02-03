@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments - RVSync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">📚</div>
+                <span class="sidebar-logo-text">RVSync</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span> Dashboard</a>
+                    <a href="hub.html" class="nav-item"><span class="nav-item-icon">🏠</span> Classroom Hub</a>
+                    <a href="chat.html" class="nav-item"><span class="nav-item-icon">💬</span> Messages</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Learning</div>
+                    <a href="courses.html" class="nav-item"><span class="nav-item-icon">📖</span> Courses</a>
+                    <a href="assignments.html" class="nav-item active"><span class="nav-item-icon">📝</span> Assignments</a>
+                    <a href="tests.html" class="nav-item"><span class="nav-item-icon">✅</span> Tests</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Career</div>
+                    <a href="opportunities.html" class="nav-item"><span class="nav-item-icon">💼</span> Opportunities</a>
+                    <a href="profile.html" class="nav-item"><span class="nav-item-icon">👤</span> Profile</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="auth.logout()">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role">Sign Out</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="container">
+                <h1 class="mb-4 animate-fade-in">📝 Assignments</h1>
+                
+                <!-- Filter Tabs -->
+                <div class="flex gap-2 mb-4">
+                    <button class="btn btn-primary" onclick="filterAssignments('all')" id="tabAll">All</button>
+                    <button class="btn btn-secondary" onclick="filterAssignments('pending')" id="tabPending">Pending</button>
+                    <button class="btn btn-secondary" onclick="filterAssignments('submitted')" id="tabSubmitted">Submitted</button>
+                    <button class="btn btn-secondary" onclick="filterAssignments('graded')" id="tabGraded">Graded</button>
+                </div>
+                
+                <div id="assignmentsList">
+                    <!-- Sample Assignments -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        if (!auth.requireAuth()) throw new Error('Not authenticated');
+        
+        const user = auth.getUser();
+        document.getElementById('userName').textContent = user?.name || 'User';
+        document.getElementById('userAvatar').textContent = auth.getUserInitials();
+        
+        const sampleAssignments = [
+            { id: 1, title: 'Binary Search Tree Implementation', course: 'Data Structures', due_date: '2026-01-25', points: 100, status: 'pending' },
+            { id: 2, title: 'React Todo App', course: 'Web Development', due_date: '2026-01-23', points: 80, status: 'submitted', grade: null },
+            { id: 3, title: 'Linear Regression Model', course: 'Machine Learning', due_date: '2026-01-20', points: 50, status: 'graded', grade: 45 },
+            { id: 4, title: 'Graph Algorithms', course: 'Data Structures', due_date: '2026-01-28', points: 100, status: 'pending' }
+        ];
+        
+        let currentFilter = 'all';
+        
+        function filterAssignments(filter) {
+            currentFilter = filter;
+            
+            // Update tab styles
+            ['all', 'pending', 'submitted', 'graded'].forEach(f => {
+                const tab = document.getElementById('tab' + f.charAt(0).toUpperCase() + f.slice(1));
+                tab.className = filter === f ? 'btn btn-primary' : 'btn btn-secondary';
+            });
+            
+            renderAssignments();
+        }
+        
+        function renderAssignments() {
+            const filtered = currentFilter === 'all' 
+                ? sampleAssignments 
+                : sampleAssignments.filter(a => a.status === currentFilter);
+            
+            const container = document.getElementById('assignmentsList');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="card text-center">
+                        <p class="text-secondary">No ${currentFilter} assignments</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(a => {
+                const dueDate = new Date(a.due_date);
+                const isPastDue = dueDate < new Date() && a.status === 'pending';
+                
+                return `
+                    <div class="card mb-4 animate-fade-in" style="border-left: 4px solid var(--${a.status === 'graded' ? 'success' : a.status === 'submitted' ? 'primary' : isPastDue ? 'error' : 'warning'}-500);">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4>${a.title}</h4>
+                                <p class="text-sm text-secondary mt-1">${a.course}</p>
+                                <div class="flex gap-2 mt-2">
+                                    <span class="badge ${isPastDue ? 'badge-error' : 'badge-warning'}">
+                                        ${isPastDue ? '⚠️ Overdue' : '📅 Due ' + dueDate.toLocaleDateString()}
+                                    </span>
+                                    <span class="badge badge-primary">${a.points} pts</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                ${a.status === 'graded' 
+                                    ? `<div class="stat-value text-gradient">${a.grade}/${a.points}</div><div class="text-sm text-secondary">Graded</div>`
+                                    : a.status === 'submitted'
+                                    ? `<span class="badge badge-success">✓ Submitted</span>`
+                                    : `<button class="btn btn-primary" onclick="showSubmitModal(${a.id})">Submit</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function showSubmitModal(id) {
+            alert('Submit modal would open for assignment ' + id + '. In the full app, you can upload files or enter text/URL submissions.');
+        }
+        
+        renderAssignments();
+    </script>
+</body>
+</html>

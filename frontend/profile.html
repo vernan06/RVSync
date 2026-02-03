@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - RVSync</title>
+    <meta name="description" content="Your profile - Skills, GitHub, LinkedIn integration">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">📚</div>
+                <span class="sidebar-logo-text">RVSync</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span> Dashboard</a>
+                    <a href="hub.html" class="nav-item"><span class="nav-item-icon">🏠</span> Classroom Hub</a>
+                    <a href="chat.html" class="nav-item"><span class="nav-item-icon">💬</span> Messages</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Learning</div>
+                    <a href="courses.html" class="nav-item"><span class="nav-item-icon">📖</span> Courses</a>
+                    <a href="assignments.html" class="nav-item"><span class="nav-item-icon">📝</span> Assignments</a>
+                    <a href="tests.html" class="nav-item"><span class="nav-item-icon">✅</span> Tests</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Career</div>
+                    <a href="opportunities.html" class="nav-item"><span class="nav-item-icon">💼</span> Opportunities</a>
+                    <a href="profile.html" class="nav-item active"><span class="nav-item-icon">👤</span> Profile</a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="auth.logout()">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role">Sign Out</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <h1 class="mb-4 animate-fade-in">👤 Profile</h1>
+                
+                <!-- Profile Header -->
+                <div class="card mb-4" style="position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 100px; background: var(--gradient-primary); opacity: 0.2;"></div>
+                    <div class="flex gap-4 items-center" style="position: relative; z-index: 1;">
+                        <div class="avatar-xl" id="profileAvatar" style="font-size: 2rem;">?</div>
+                        <div style="flex: 1;">
+                            <h2 id="profileName">Loading...</h2>
+                            <p class="text-secondary" id="profileEmail">-</p>
+                            <div class="flex gap-2 mt-2">
+                                <span class="badge badge-primary" id="profileStudentId">-</span>
+                                <span class="badge badge-success" id="profileGpa">GPA: -</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button class="btn btn-secondary" onclick="openProfileEditor()">✏️ Edit Profile</button>
+                            <button class="btn btn-ghost text-sm" onclick="openSkillAdder()">+ Add New Skill</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <!-- GitHub Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">🐙 GitHub Integration</h3>
+                            <button class="btn btn-secondary text-sm" onclick="syncGitHub()" id="syncGitHubBtn">🔄 Sync</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">GitHub Profile URL</label>
+                            <input type="url" class="form-input" id="githubUrl" placeholder="https://github.com/username">
+                        </div>
+                        <button class="btn btn-ghost text-sm" onclick="saveGitHub()">Save & Sync</button>
+                        <div id="githubRepos" class="mt-4">
+                            <p class="text-secondary text-sm">Connect your GitHub to see repositories</p>
+                        </div>
+                    </div>
+                    
+                    <!-- LinkedIn Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">💼 LinkedIn Integration</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">LinkedIn Profile URL</label>
+                            <input type="url" class="form-input" id="linkedinUrl" placeholder="https://linkedin.com/in/username">
+                        </div>
+                        <button class="btn btn-ghost text-sm" onclick="saveLinkedIn()">Save</button>
+                        <div id="linkedinExperience" class="mt-4">
+                            <p class="text-secondary text-sm">Connect your LinkedIn to import experience</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Skills Section -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">🛠️ Skills</h3>
+                        <button class="btn btn-primary text-sm" onclick="openSkillAdder()">+ Add Skill</button>
+                    </div>
+                    <div id="skillsList" class="flex gap-2" style="flex-wrap: wrap;">
+                        <p class="text-secondary text-sm">No skills added yet</p>
+                    </div>
+                </div>
+                
+                <!-- Career Prediction -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">🔮 Career Prediction</h3>
+                        <button class="btn btn-secondary text-sm" onclick="getPrediction()">Generate Prediction</button>
+                    </div>
+                    <div id="predictionResult">
+                        <p class="text-secondary text-sm">Click "Generate Prediction" to get AI-powered career insights</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Edit Modal -->
+    <div id="editModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 999;">
+        <div class="card" style="width: 100%; max-width: 500px; margin: 1rem; max-height: 90vh; overflow-y: auto;">
+            <div class="card-header">
+                <h3 class="card-title">Edit Profile</h3>
+                <button class="btn btn-ghost btn-icon" onclick="hideEditModal()">✕</button>
+            </div>
+            <form id="editForm">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="editName" required>
+                </div>
+                <div class="grid-2" id="academicFieldsContainer" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Branch</label>
+                        <select class="form-select" id="editBranch">
+                            <option value="">Select Branch</option>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="MECH">MECH</option>
+                            <option value="CIVIL">CIVIL</option>
+                            <option value="ISE">ISE</option>
+                            <option value="AIML">AIML</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year</label>
+                        <select class="form-select" id="editYear">
+                            <option value="">Select Year</option>
+                            <option value="FIRST">1st Year</option>
+                            <option value="SECOND">2nd Year</option>
+                            <option value="THIRD">3rd Year</option>
+                            <option value="FOURTH">4th Year</option>
+                        </select>
+                    </div>
+                    <!-- Section inside grid or outside? User added section earlier. 
+                         Previous replace added section AFTER the grid-2 div. 
+                         I should include separate Section div in this container or move it in. 
+                         The previous file content had section after the grid. 
+                         I will move section INSIDE this container so I can hide it all at once with ID.
+                    -->
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">Section</label>
+                        <input type="text" class="form-input" id="editSection" placeholder="e.g., A, B, C" maxlength="2">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" id="editPhone" placeholder="+91 9876543210">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bio</label>
+                    <textarea class="form-textarea" id="editBio" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Skill Modal -->
+    <div id="skillModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 999;">
+        <div class="card" style="width: 100%; max-width: 400px; margin: 1rem;">
+            <div class="card-header">
+                <h3 class="card-title">Add Skill</h3>
+                <button class="btn btn-ghost btn-icon" onclick="hideSkillModal()">✕</button>
+            </div>
+            <form id="skillForm">
+                <div class="form-group">
+                    <label class="form-label">Skill Name</label>
+                    <input type="text" class="form-input" id="skillName" placeholder="e.g., Python" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Proficiency</label>
+                    <select class="form-select" id="skillProficiency">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate" selected>Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Add Skill</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        if (!auth.requireAuth()) throw new Error('Not authenticated');
+        
+        const user = auth.getUser();
+        let profileData = null;
+        
+        document.getElementById('userName').textContent = user?.name || 'User';
+        document.getElementById('userAvatar').textContent = auth.getUserInitials();
+        
+        async function loadProfile() {
+            try {
+                profileData = await api.getProfile();
+                
+                document.getElementById('profileName').textContent = profileData.name;
+                document.getElementById('profileEmail').textContent = profileData.email;
+                document.getElementById('profileGpa').textContent = `GPA: ${profileData.gpa?.toFixed(2) || '0.00'}`;
+                
+                // Display Academic Info
+                if (profileData.branch && profileData.year_level && profileData.section) {
+                     const infoDiv = document.createElement('div');
+                     infoDiv.className = 'mt-2 text-sm';
+                     infoDiv.innerHTML = `<span class="badge badge-primary">${profileData.branch}</span> <span class="badge badge-secondary">${profileData.year_level}</span> <span class="badge badge-success">Sec ${profileData.section}</span>`;
+                     const existing = document.getElementById('academicInfoDisplay');
+                     if (existing) existing.remove();
+                     infoDiv.id = 'academicInfoDisplay';
+                     document.getElementById('profileGpa').parentNode.appendChild(infoDiv);
+                }
+                
+                document.getElementById('profileAvatar').textContent = profileData.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+                document.getElementById('githubUrl').value = profileData.github_url || '';
+                document.getElementById('linkedinUrl').value = profileData.linkedin_url || '';
+                
+                // Skills
+                if (profileData.skills && profileData.skills.length > 0) {
+                    document.getElementById('skillsList').innerHTML = profileData.skills.map(s => 
+                        `<span class="badge badge-primary">${s}</span>`
+                    ).join('');
+                }
+                
+                // GitHub repos
+                if (profileData.github_repos && profileData.github_repos.length > 0) {
+                    document.getElementById('githubRepos').innerHTML = profileData.github_repos.slice(0, 5).map(r => `
+                        <div style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <a href="${r.url}" target="_blank" class="font-medium">${r.repo_name}</a>
+                            <div class="flex gap-2 text-xs text-secondary mt-1">
+                                <span>⭐ ${r.stars}</span>
+                                <span>${r.language || 'Unknown'}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        }
+        
+        async function syncGitHub() {
+            const btn = document.getElementById('syncGitHubBtn');
+            btn.disabled = true;
+            btn.textContent = 'Syncing...';
+            
+            try {
+                const result = await api.syncGitHub(user.id);
+                alert(`Synced! Found ${result.skills_found.length} skills from your repos.`);
+                loadProfile();
+            } catch (error) {
+                alert('Failed to sync: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 Sync';
+            }
+        }
+        
+        async function saveGitHub() {
+            const url = document.getElementById('githubUrl').value;
+            try {
+                await api.updateProfile(user.id, { github_url: url });
+                alert('GitHub URL saved! Click Sync to import repos.');
+            } catch (error) {
+                alert('Failed to save: ' + error.message);
+            }
+        }
+        
+        async function saveLinkedIn() {
+            const url = document.getElementById('linkedinUrl').value;
+            try {
+                await api.updateProfile(user.id, { linkedin_url: url });
+                alert('LinkedIn URL saved!');
+            } catch (error) {
+                alert('Failed to save: ' + error.message);
+            }
+        }
+        
+        async function getPrediction() {
+            const resultDiv = document.getElementById('predictionResult');
+            resultDiv.innerHTML = '<p class="text-secondary">Generating prediction...</p>';
+            
+            try {
+                const prediction = await api.getCareerPrediction(user.id);
+                resultDiv.innerHTML = `
+                    <div class="grid-2">
+                        <div>
+                            <h4 class="text-gradient">${prediction.predicted_role}</h4>
+                            <p class="text-sm text-secondary">Predicted in ${prediction.timeline_months} months</p>
+                            <div class="progress-bar mt-2">
+                                <div class="progress-fill" style="width: ${prediction.confidence}%"></div>
+                            </div>
+                            <p class="text-xs text-secondary mt-1">${prediction.confidence.toFixed(0)}% confidence</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium mb-2">Alternative Paths:</p>
+                            ${prediction.alternative_roles.map(r => `<span class="badge badge-secondary">${r}</span>`).join(' ')}
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="font-medium mb-2">💡 Insights</p>
+                        <p class="text-sm text-secondary">${prediction.insights}</p>
+                    </div>
+                    <div class="mt-4">
+                        <p class="font-medium mb-2">📋 Recommendations</p>
+                        <p class="text-sm text-secondary" style="white-space: pre-line;">${prediction.recommendations}</p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="text-secondary">Failed to generate: ${error.message}</p>`;
+            }
+        }
+        
+        function openProfileEditor() {
+            // Close other modal if open
+            hideSkillModal();
+            
+            document.getElementById('editName').value = profileData?.name || '';
+            document.getElementById('editPhone').value = profileData?.phone || '';
+            document.getElementById('editBio').value = profileData?.bio || '';
+            
+            // Handle Academic Fields
+            const academicFieldsContainer = document.getElementById('academicFieldsContainer');
+            const branchInput = document.getElementById('editBranch');
+            const yearInput = document.getElementById('editYear');
+            const sectionInput = document.getElementById('editSection');
+            
+            // Populate
+            branchInput.value = profileData?.branch || '';
+            yearInput.value = profileData?.year_level || '';
+            sectionInput.value = profileData?.section || '';
+            
+            // If already set, Remove the fields from the form (Hide container or specific inputs)
+            // But we grouped them. I added ID 'academicFieldsContainer' to HTML below first? 
+            // Better to query the parent divs.
+            
+            // Let's hide the PARENT DIVs of these inputs if they are set
+            if (profileData?.branch && profileData?.year_level && profileData?.section) {
+                // All set? Hide the whole academic section from the form
+                // We need to give the container an ID in HTML first.
+                if (academicFieldsContainer) academicFieldsContainer.style.display = 'none';
+            } else {
+                if (academicFieldsContainer) academicFieldsContainer.style.display = 'grid'; // or block
+                // Disable individual ones if partially set?
+                branchInput.disabled = !!profileData?.branch;
+                yearInput.disabled = !!profileData?.year_level;
+                // Section might be last
+            }
+            
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        
+        function hideEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        
+        function openSkillAdder() {
+            // Close other modal if open
+            hideEditModal();
+            
+            const modal = document.getElementById('skillModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        
+        function hideSkillModal() {
+            const modal = document.getElementById('skillModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await api.updateProfile(user.id, {
+                    name: document.getElementById('editName').value,
+                    phone: document.getElementById('editPhone').value,
+                    bio: document.getElementById('editBio').value,
+                    branch: document.getElementById('editBranch').value,
+                    year_level: document.getElementById('editYear').value,
+                    section: document.getElementById('editSection').value
+                });
+                hideEditModal();
+                loadProfile();
+            } catch (error) {
+                alert('Failed to update: ' + error.message);
+            }
+        });
+        
+        document.getElementById('skillForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await api.addSkill(user.id, {
+                    skill_name: document.getElementById('skillName').value,
+                    proficiency: document.getElementById('skillProficiency').value
+                });
+                hideSkillModal();
+                document.getElementById('skillName').value = '';
+                loadProfile();
+            } catch (error) {
+                alert('Failed to add skill: ' + error.message);
+            }
+        });
+        
+        loadProfile();
+    </script>
+</body>
+</html>

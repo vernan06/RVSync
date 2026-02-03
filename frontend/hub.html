@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Hub - RVSync</title>
+    <meta name="description" content="Your classroom hub - Connect with classmates, view announcements">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">📚</div>
+                <span class="sidebar-logo-text">RVSync</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Main</div>
+                    <a href="dashboard.html" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="hub.html" class="nav-item active">
+                        <span class="nav-item-icon">🏠</span>
+                        Classroom Hub
+                    </a>
+                    <a href="chat.html" class="nav-item">
+                        <span class="nav-item-icon">💬</span>
+                        Messages
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">Learning</div>
+                    <a href="courses.html" class="nav-item">
+                        <span class="nav-item-icon">📖</span>
+                        Courses
+                    </a>
+                    <a href="assignments.html" class="nav-item">
+                        <span class="nav-item-icon">📝</span>
+                        Assignments
+                    </a>
+                    <a href="tests.html" class="nav-item">
+                        <span class="nav-item-icon">✅</span>
+                        Tests
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">Career</div>
+                    <a href="opportunities.html" class="nav-item">
+                        <span class="nav-item-icon">💼</span>
+                        Opportunities
+                    </a>
+                    <a href="profile.html" class="nav-item">
+                        <span class="nav-item-icon">👤</span>
+                        Profile
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="auth.logout()">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role">Sign Out</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h1 class="animate-fade-in">🏠 Classroom Hub</h1>
+                        <p class="text-secondary mt-1">Connect with classmates and stay updated</p>
+                    </div>
+                </div>
+                
+                <!-- Filter removed as per strict profile requirement -->
+                <!-- <div class="card mb-4"> ... </div> -->
+                
+                <!-- Classrooms Grid -->
+                <div class="grid-3" id="classroomsGrid">
+                    <div class="card">
+                        <p class="text-center text-secondary">Loading classrooms...</p>
+                    </div>
+                </div>
+                
+                <!-- Selected Classroom Hub View -->
+                <div id="hubView" class="hidden mt-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 id="hubTitle" class="text-2xl font-bold">Classroom Hub</h2>
+                        <div id="hubBadges" class="flex gap-2">
+                             <!-- Dynamically filled -->
+                        </div>
+                    </div>
+                    
+                    <div class="grid-3 mb-6">
+                        <!-- Daily Agenda (Targeted) -->
+                        <div class="card bg-primary/10 border-primary/20">
+                            <div class="card-header pb-2">
+                                <h3 class="card-title text-primary">🎯 Next Up</h3>
+                            </div>
+                            <div id="nextClass" class="p-2">
+                                <p class="text-secondary text-sm">Checking schedule...</p>
+                            </div>
+                        </div>
+
+                        <!-- Announcements Summary -->
+                        <div class="card">
+                            <div class="card-header pb-2">
+                                <h3 class="card-title">📢 Announcements</h3>
+                            </div>
+                            <div id="announcementsList" class="max-h-[120px] overflow-y-auto"></div>
+                        </div>
+
+                         <!-- Section Contacts -->
+                         <div class="card">
+                            <div class="card-header pb-2">
+                                <h3 class="card-title">👥 Section Contacts</h3>
+                            </div>
+                            <div id="membersList" class="max-h-[120px] overflow-y-auto"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Full Timetable Section -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">📅 Weekly Timetable</h3>
+                        </div>
+                        <div id="coursesList"></div>
+                    </div>
+
+                    <!-- Events Section -->
+                    <div class="card">
+                        <div class="card-header flex justify-between items-center">
+                            <h3 class="card-title">📅 Events for the Day</h3>
+                            <span class="text-xs text-secondary" id="eventDate">Friday, Jan 23</span>
+                        </div>
+                        <div id="eventsList" class="grid-2 mt-4">
+                            <p class="text-secondary text-sm p-4 text-center col-span-full">No events scheduled for today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Create Classroom Modal -->
+    <div id="createModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 999;">
+        <div class="card" style="width: 100%; max-width: 500px; margin: 1rem;">
+            <div class="card-header">
+                <h3 class="card-title">Create New Classroom</h3>
+                <button class="btn btn-ghost btn-icon" onclick="hideCreateModal()">✕</button>
+            </div>
+            <form id="createForm">
+                <div class="form-group">
+                    <label class="form-label">Classroom Name</label>
+                    <input type="text" class="form-input" id="classroomName" placeholder="e.g., CSE-A 2024" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Classroom Code</label>
+                    <input type="text" class="form-input" id="classroomCode" placeholder="e.g., CSE-A-2024" required>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Branch</label>
+                        <select class="form-select" id="classroomBranch" required>
+                            <option value="CSE">CSE</option>
+                            <option value="ISE">ISE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="MECH">Mechanical</option>
+                            <option value="AIML">AI & ML</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year</label>
+                        <select class="form-select" id="classroomYear" required>
+                            <option value="FIRST">First Year</option>
+                            <option value="SECOND">Second Year</option>
+                            <option value="THIRD">Third Year</option>
+                            <option value="FOURTH">Fourth Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Semester</label>
+                        <select class="form-select" id="classroomSemester" required>
+                            <option value="ODD">Odd</option>
+                            <option value="EVEN">Even</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Section</label>
+                        <input type="text" class="form-input" id="classroomSection" placeholder="A" required maxlength="2">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Create Classroom</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ai-support.js"></script>
+    <script>
+        if (!auth.requireAuth()) throw new Error('Not authenticated');
+        
+        const user = auth.getUser();
+        document.getElementById('userName').textContent = user?.name || 'User';
+        document.getElementById('userAvatar').textContent = auth.getUserInitials();
+        
+        // Refresh user data to check for branch/year
+        (async () => {
+            try {
+                const profile = await api.getProfile();
+                auth.setUser(profile); // Update local storage
+                
+                if (!profile.year_level || !profile.branch || !profile.section) {
+                    const container = document.querySelector('.container');
+                    const warning = document.createElement('div');
+                    warning.className = 'card mb-4';
+                    warning.style.borderLeft = '4px solid var(--warning-500)';
+                    warning.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-medium">⚠️ Complete your profile</h3>
+                                <p class="text-secondary text-sm">Please set your Branch, Year, and Section in your profile to see relevant classrooms.</p>
+                            </div>
+                            <a href="profile.html" class="btn btn-primary">Go to Profile</a>
+                        </div>
+                    `;
+                    container.insertBefore(warning, container.children[1]); // Insert after header
+                }
+            } catch (e) {
+                console.error("Failed to refresh profile", e);
+            }
+        })();
+        
+        let currentClassroomId = null;
+        
+        async function loadClassrooms() {
+            try {
+                const profile = await api.getProfile();
+                if (!profile.year_level || !profile.branch || !profile.section) {
+                     document.getElementById('classroomsGrid').innerHTML = '';
+                     return;
+                }
+                
+                const classrooms = await api.listClassrooms(null, null);
+                
+                // Find matching classroom for the user
+                const myClass = classrooms.find(c => 
+                    c.branch === profile.branch && 
+                    c.year_level === profile.year_level && 
+                    c.section === profile.section
+                );
+
+                if (myClass) {
+                    openHub(myClass.id);
+                } else if (classrooms.length > 0) {
+                    // Fallback to first available if no exact match (optional, but keep for safety)
+                    openHub(classrooms[0].id);
+                } else {
+                    document.getElementById('classroomsGrid').innerHTML = `
+                        <div class="card col-span-full text-center">
+                            <p class="text-secondary">No classrooms found for your profile.</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Failed to load classrooms:', error);
+            }
+        }
+        
+        const timetableData = {
+            'MONDAY': [
+                { time: '9:00 - 10:00', subject: 'OS', room: 'F101' },
+                { time: '10:00 - 11:00', subject: 'MATHS', room: 'F101' },
+                { time: '11:30 - 12:30', subject: 'BASKET', room: 'F101' },
+                { time: '12:30 - 1:30', subject: 'ADLD', room: 'F101' },
+                { time: '2:30 - 4:30', subject: 'Design Thinking Lab', room: 'F101' }
+            ],
+            'TUESDAY': [
+                { time: '9:00 - 11:00', subject: 'OS/DSA Lab', room: 'Lab 1/5' },
+                { time: '11:30 - 12:30', subject: 'DSA', room: 'F101' },
+                { time: '12:30 - 1:30', subject: 'MATHS', room: 'F101' },
+                { time: '2:30 - 4:30', subject: 'ADLD Lab', room: 'PG Lab' }
+            ],
+            'WEDNESDAY': [
+                { time: '9:00 - 10:00', subject: 'ADLD', room: 'F101' },
+                { time: '10:00 - 11:00', subject: 'MATHS', room: 'F101' },
+                { time: '11:30 - 1:30', subject: 'OS/DSA Lab', room: 'Lab 7/8' },
+                { time: '2:30 - 3:30', subject: 'DSA', room: 'F101' },
+                { time: '3:30 - 4:30', subject: 'BASKET', room: 'F101' }
+            ],
+            'THURSDAY': [
+                { time: '9:00 - 10:00', subject: 'ADLD', room: 'F101' },
+                { time: '10:00 - 11:00', subject: 'OS', room: 'F101' },
+                { time: '11:30 - 1:30', subject: 'ADLD Lab', room: 'Lab' },
+                { time: '2:30 - 3:30', subject: 'EL', room: 'F101' },
+                { time: '3:30 - 4:30', subject: 'Counselling', room: 'F101' }
+            ],
+            'FRIDAY': [
+                { time: '9:00 - 10:00', subject: 'OS', room: 'F101' },
+                { time: '10:00 - 11:00', subject: 'BASKET', room: 'F101' },
+                { time: '11:30 - 12:30', subject: 'DSA', room: 'F101' },
+                { time: '12:30 - 1:30', subject: 'MATHS', room: 'F101' },
+                { time: '2:30 - 4:30', subject: 'Bridge C', room: 'F101' }
+            ],
+            'SATURDAY': [
+                { time: '9:00 - 11:00', subject: 'Lab / Self-Study', room: 'Dept. Lab' },
+                { time: '11:00 - 1:00', subject: 'Soft Skills / Clubs', room: 'Auditorium' }
+            ]
+        };
+
+        function getDatesOfWeek() {
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 (Sun) to 6 (Sat)
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+            
+            const dates = {};
+            const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+            
+            days.forEach((day, index) => {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + index);
+                dates[day] = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            return dates;
+        }
+
+        async function openHub(classroomId) {
+            currentClassroomId = classroomId;
+            
+            try {
+                const hub = await api.getClassroomHub(classroomId);
+                document.getElementById('hubTitle').innerHTML = `<span class="text-secondary text-base block font-normal mb-1">SECTION HUB</span> <span class="text-primary">${hub.name}</span>`;
+                
+                // Set badges
+                document.getElementById('hubBadges').innerHTML = `
+                    <span class="badge badge-primary">${hub.branch}</span>
+                    <span class="badge badge-secondary">${hub.year_level}</span>
+                `;
+
+                // Hide landing grid, show hub
+                document.getElementById('classroomsGrid').classList.add('hidden');
+                document.getElementById('hubView').classList.remove('hidden');
+
+                // Members
+                const membersList = document.getElementById('membersList');
+                membersList.innerHTML = hub.members.slice(0, 10).map(m => `
+                    <div class="flex items-center gap-2 p-1">
+                        <div class="avatar-xs">${m.name[0]}</div>
+                        <div class="text-xs truncate">${m.name} ${m.role === 'instructor' ? '👨‍🏫' : ''}</div>
+                    </div>
+                `).join('');
+                
+                // Announcements
+                const annList = document.getElementById('announcementsList');
+                if (hub.announcements.length > 0) {
+                    annList.innerHTML = hub.announcements.map(a => `
+                        <div class="text-xs p-1 border-b border-white/5 last:border-0">
+                            <div class="font-medium truncate">${a.title}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    annList.innerHTML = '<div class="text-[10px] text-secondary">No recent updates</div>';
+                }
+
+                // Timetable
+                const timetableContainer = document.getElementById('coursesList');
+                const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+                const weekDates = getDatesOfWeek();
+                const now = new Date();
+                const currentDay = days[now.getDay() - 1] || 'MONDAY'; 
+                
+                timetableContainer.innerHTML = `
+                    <div class="timetable-wrapper">
+                        <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                            ${days.map(day => `
+                                <button class="btn btn-xs ${day === currentDay ? 'btn-primary' : 'btn-ghost'}" onclick="showDay('${day}', this)">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[10px] opacity-70">${weekDates[day]}</span>
+                                        <span>${day.slice(0,3)}</span>
+                                    </div>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div id="daySchedule" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            ${renderDay(currentDay)}
+                        </div>
+                    </div>
+                `;
+
+                updateNextClass();
+                loadEvents(classroomId);
+                
+            } catch (error) {
+                console.error('Hub load error:', error);
+            }
+        }
+
+        async function loadEvents(classroomId) {
+            const container = document.getElementById('eventsList');
+            const dateSpan = document.getElementById('eventDate');
+            
+            const now = new Date();
+            dateSpan.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+            try {
+                const events = await api.getClassroomEvents(classroomId);
+                
+                // Filter for events today
+                const today = now.toISOString().split('T')[0];
+                const eventsToday = events.filter(e => e.start_time.split('T')[0] === today);
+
+                if (eventsToday.length === 0) {
+                    container.innerHTML = '<p class="text-secondary text-sm p-4 text-center col-span-full">No events scheduled for today</p>';
+                    return;
+                }
+
+                container.innerHTML = eventsToday.map(e => `
+                    <div class="card p-3 border-l-4 ${e.event_type === 'exam' ? 'border-error bg-error/5' : e.event_type === 'seminar' ? 'border-primary bg-primary/5' : 'border-secondary bg-secondary/5'}">
+                        <div class="text-[10px] font-bold uppercase ${e.event_type === 'exam' ? 'text-error' : 'text-primary'}">${e.event_type}</div>
+                        <h4 class="text-sm font-bold mt-1">${e.title}</h4>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs text-secondary">⏰ ${new Date(e.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            <span class="text-[10px] text-secondary">📍 ${e.location || 'Online'}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error("Error loading events:", error);
+            }
+        }
+
+        function updateNextClass() {
+            const now = new Date();
+            const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+            const currentDay = days[now.getDay()];
+            const currentTime = now.getHours() * 100 + now.getMinutes();
+            
+            const entries = timetableData[currentDay] || [];
+            let next = null;
+
+            for (const entry of entries) {
+                const startTimeStr = entry.time.split('-')[0].trim(); // e.g. "9:00"
+                const [h, m] = startTimeStr.split(':').map(Number);
+                const startTime = h * 100 + m;
+
+                if (startTime > currentTime) {
+                    next = entry;
+                    break;
+                }
+            }
+
+            const container = document.getElementById('nextClass');
+            if (next) {
+                container.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold text-lg">${next.subject}</div>
+                            <div class="text-xs text-secondary mt-1">Starts at ${next.time.split('-')[0]}</div>
+                        </div>
+                        <div class="text-xs bg-primary/20 text-primary px-2 py-1 rounded">Room ${next.room}</div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `<p class="text-secondary text-sm">No more classes today! 🎉</p>`;
+            }
+        }
+
+        function renderDay(day) {
+            const sessions = timetableData[day] || [];
+            return sessions.map(s => `
+                <div class="card p-4 border border-white/5 hover:border-primary/30 transition-all">
+                    <div class="text-xs text-primary font-bold mb-1">${s.time}</div>
+                    <div class="font-bold text-lg">${s.subject}</div>
+                    <div class="text-xs text-secondary flex items-center gap-1 mt-2">
+                        <span>📍 Room: ${s.room}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showDay(day, btn) {
+            // Update active button
+            btn.parentElement.querySelectorAll('button').forEach(b => b.classList.replace('btn-primary', 'btn-ghost'));
+            btn.classList.replace('btn-ghost', 'btn-primary');
+            // Update schedule
+            document.getElementById('daySchedule').innerHTML = renderDay(day);
+        }
+        
+        function hideHub() {
+            document.getElementById('classroomsGrid').classList.remove('hidden');
+            document.getElementById('hubView').classList.add('hidden');
+            currentClassroomId = null;
+        }
+        
+        function showCreateModal() {
+            document.getElementById('createModal').classList.remove('hidden');
+            document.getElementById('createModal').style.display = 'flex';
+        }
+        
+        function hideCreateModal() {
+            document.getElementById('createModal').classList.add('hidden');
+            document.getElementById('createModal').style.display = 'none';
+        }
+        
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                await api.createClassroom({
+                    name: document.getElementById('classroomName').value,
+                    code: document.getElementById('classroomCode').value,
+                    branch: document.getElementById('classroomBranch').value,
+                    year_level: document.getElementById('classroomYear').value,
+                    semester: document.getElementById('classroomSemester').value,
+                    section: document.getElementById('classroomSection').value
+                });
+                
+                hideCreateModal();
+                loadClassrooms();
+            } catch (error) {
+                alert('Failed to create classroom: ' + error.message);
+            }
+        });
+        
+        // Initialize
+        loadClassrooms();
+    </script>
+</body>
+</html>

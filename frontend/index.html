@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RVSync - Learning & Career Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+        .hero-content { max-width: 800px; }
+        .hero h1 { font-size: 4rem; font-weight: 800; margin-bottom: 1.5rem; }
+        .hero p { font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 2rem; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .features { padding: 6rem 2rem; background: var(--bg-secondary); }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; }
+        .feature-card { background: var(--bg-card); padding: 2rem; border-radius: var(--border-radius-lg); border: 1px solid var(--border-color); }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .stats-section { padding: 4rem 2rem; text-align: center; }
+        .stats-row { display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap; margin-top: 2rem; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 3rem; font-weight: 700; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content animate-fade-in">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+            <h1><span class="text-gradient">RVSync</span></h1>
+            <p>Autonomous Learning Management & Career Development Platform. Real-time collaboration, intelligent course management, and AI-powered career insights.</p>
+            <div class="hero-buttons">
+                <a href="register.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Get Started Free →</a>
+                <a href="login.html" class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem;">Sign In</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2 class="text-center mb-4" style="font-size: 2.5rem;">Why <span class="text-gradient">RVSync</span>?</h2>
+        <div class="features-grid">
+            <div class="feature-card"><div class="feature-icon">🏠</div><h4>Classroom Hub</h4><p class="text-secondary">Create classrooms, manage courses, and collaborate with classmates in real-time.</p></div>
+            <div class="feature-card"><div class="feature-icon">💬</div><h4>Real-time Chat</h4><p class="text-secondary">WebSocket-powered messaging for instant communication with peers.</p></div>
+            <div class="feature-card"><div class="feature-icon">📝</div><h4>Assignments & Tests</h4><p class="text-secondary">Submit assignments, take tests, and track your grades automatically.</p></div>
+            <div class="feature-card"><div class="feature-icon">🤖</div><h4>AI Career Insights</h4><p class="text-secondary">7 ML models for career predictions, opportunity matching, and skill analysis.</p></div>
+            <div class="feature-card"><div class="feature-icon">🐙</div><h4>GitHub Integration</h4><p class="text-secondary">Sync repositories, extract skills, and showcase your projects.</p></div>
+            <div class="feature-card"><div class="feature-icon">💼</div><h4>Opportunity Matching</h4><p class="text-secondary">AI-powered job matching based on your skills and experience.</p></div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <h2 style="font-size: 2rem;">Built for <span class="text-gradient">Scale</span></h2>
+        <div class="stats-row">
+            <div class="stat-item"><div class="stat-number">20+</div><div class="text-secondary">API Endpoints</div></div>
+            <div class="stat-item"><div class="stat-number">7</div><div class="text-secondary">ML Models</div></div>
+            <div class="stat-item"><div class="stat-number">10+</div><div class="text-secondary">Frontend Pages</div></div>
+            <div class="stat-item"><div class="stat-number">13</div><div class="text-secondary">Database Tables</div></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="padding: 2rem; text-align: center; border-top: 1px solid var(--border-color);">
+        <p class="text-secondary">© 2026 RVSync. Built for RVCE students. <a href="login.html">Sign In</a></p>
+    </footer>
+</body>
+</html>
